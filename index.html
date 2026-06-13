@@ -25,13 +25,52 @@
   body{
     margin:0;
     background:var(--paper);
-    background-image:
-      radial-gradient(ellipse at top left, rgba(139,94,52,0.05), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(139,94,52,0.05), transparent 50%);
     color:var(--ink);
     font-family:'EB Garamond', serif;
     font-size:18px;
     line-height:1.7;
+    position:relative;
+  }
+
+  /* Background ornament layer */
+  .bg-ornaments{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    overflow:hidden;
+    background:var(--paper);
+  }
+  .bg-ornaments .layer{
+    position:absolute;
+    inset:0;
+    background-repeat:no-repeat;
+    mix-blend-mode:multiply;
+  }
+  .bg-blueprint{
+    background-image:url('assets/blueprint.png');
+    background-size:900px;
+    background-position:top right;
+    opacity:0.05;
+  }
+  .bg-door{
+    background-image:url('assets/door.png');
+    background-size:380px;
+    background-position:left -60px bottom -40px;
+    opacity:0.05;
+  }
+  .bg-cherub-top{
+    background-image:url('assets/cherub.png');
+    background-size:420px;
+    background-position:center -40px;
+    opacity:0.045;
+  }
+  .bg-cherub-bottom{
+    background-image:url('assets/cherub.png');
+    background-size:420px;
+    background-position:center bottom 0;
+    transform:rotate(180deg);
+    opacity:0.045;
   }
 
   /* Frame / page border */
@@ -40,17 +79,9 @@
     border:1px solid var(--line);
     position:relative;
     min-height:calc(100vh - 28px);
+    background:rgba(245,239,227,0.55);
   }
-  .frame::before, .frame::after{
-    content:'';
-    position:absolute;
-    width:36px; height:36px;
-    border:1px solid var(--sepia);
-    opacity:0.5;
-  }
-  .frame::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
-  .frame::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
-  .frame .corner-tl, .frame .corner-br{
+  .frame .corner-tr, .frame .corner-bl{
     position:absolute; width:36px; height:36px; border:1px solid var(--sepia); opacity:0.5;
   }
   .corner-tr{ top:-1px; right:-1px; border-left:none; border-bottom:none; }
@@ -257,8 +288,18 @@
     transform:translateX(8px);
     transition:opacity 0.3s, transform 0.3s;
     pointer-events:none;
+    text-align:right;
+    max-width:220px;
   }
   .audio-label.visible{ opacity:1; transform:translateX(0); }
+  .audio-track-name{
+    display:block;
+    font-style:italic;
+    text-transform:none;
+    letter-spacing:0;
+    color:var(--sepia);
+    margin-top:2px;
+  }
 
   /* Lightbox */
   .lightbox{
@@ -312,13 +353,6 @@
     padding:6px;
   }
   .lightbox-close:hover{ color:var(--sepia); }
-  .lightbox-music{
-    font-family:'Cutive Mono', monospace;
-    font-size:11px;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:var(--sepia);
-  }
 
   /* Footer */
   footer{
@@ -340,10 +374,19 @@
     header{ padding:60px 16px 40px; }
     section{ padding:50px 16px 60px; }
     nav{ gap:24px; }
+    .bg-door, .bg-blueprint, .bg-cherub-top, .bg-cherub-bottom{ opacity:0.035; }
   }
 </style>
 </head>
 <body>
+
+<div class="bg-ornaments">
+  <div class="layer bg-cherub-top"></div>
+  <div class="layer bg-blueprint"></div>
+  <div class="layer bg-door"></div>
+  <div class="layer bg-cherub-bottom"></div>
+</div>
+
 <div class="frame">
   <div class="corner-tr"></div>
   <div class="corner-bl"></div>
@@ -373,30 +416,9 @@
     <div class="section-head">
       <span class="section-num">Defter I</span>
       <h2 class="section-title">Çizimler</h2>
-      <p class="section-desc">Her levhaya dokunduğunuzda görsel büyür ve o ana eşlik eden bir ezgi başlar.</p>
+      <p class="section-desc">Her levhaya dokunduğunuzda görsel büyür.</p>
     </div>
-    <div class="gallery">
-      <article class="plate" tabindex="0" data-img="portrait1.jpg" data-title="Profil Çalışması" data-date="13.06.26" data-track="andante">
-        <img src="portrait1.jpg" alt="Profilden yaşlı bir adamın kalem ve mürekkep çalışması, dalgalı saçlar ve gölgelendirme ile.">
-        <div class="plate-cap">
-          <span class="plate-title">Profil Çalışması</span>
-          <span class="plate-date">13.06.26</span>
-        </div>
-      </article>
-
-      <article class="plate" tabindex="0" data-img="portrait2.jpg" data-title="Bereli Portre" data-date="10.06.26" data-track="largo">
-        <img src="portrait2.jpg" alt="Bereli bir adamın yoğun çapraz tarama tekniğiyle yapılmış mürekkep portresi.">
-        <div class="plate-cap">
-          <span class="plate-title">Bereli Portre</span>
-          <span class="plate-date">10.06.26</span>
-        </div>
-      </article>
-
-      <article class="placeholder">
-        <span class="ph-icon">+</span>
-        Yeni bir çizim ekleyin
-      </article>
-    </div>
+    <div class="gallery" id="gallery-cizimler"></div>
   </section>
 
   <!-- YAZILAR -->
@@ -404,13 +426,9 @@
     <div class="section-head">
       <span class="section-num">Defter II</span>
       <h2 class="section-title">Yazılar</h2>
-      <p class="section-desc">Notlar, denemeler ve düşünceler — buraya yüklenecek metinler için ayrılmış sayfa.</p>
+      <p class="section-desc">Notlar, denemeler ve düşünceler.</p>
     </div>
-    <div class="placeholder-grid">
-      <div class="placeholder"><span class="ph-icon">✎</span>Bir yazı ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">✎</span>Bir yazı ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">✎</span>Bir yazı ekleyin</div>
-    </div>
+    <div class="placeholder-grid" id="gallery-yazilar"></div>
   </section>
 
   <!-- PROJELER -->
@@ -418,13 +436,9 @@
     <div class="section-head">
       <span class="section-num">Defter III</span>
       <h2 class="section-title">Projeler</h2>
-      <p class="section-desc">Tamamlanmış ve sürmekte olan çalışmalar buraya eklenecek.</p>
+      <p class="section-desc">Tamamlanmış ve sürmekte olan çalışmalar.</p>
     </div>
-    <div class="placeholder-grid">
-      <div class="placeholder"><span class="ph-icon">◇</span>Bir proje ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">◇</span>Bir proje ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">◇</span>Bir proje ekleyin</div>
-    </div>
+    <div class="placeholder-grid" id="gallery-projeler"></div>
   </section>
 
   <!-- GEZİLER -->
@@ -432,13 +446,9 @@
     <div class="section-head">
       <span class="section-num">Defter IV</span>
       <h2 class="section-title">Geziler</h2>
-      <p class="section-desc">Gidilen yerlerden notlar ve görüntüler için ayrılmış sayfa.</p>
+      <p class="section-desc">Gidilen yerlerden notlar ve görüntüler.</p>
     </div>
-    <div class="placeholder-grid">
-      <div class="placeholder"><span class="ph-icon">✦</span>Bir gezi ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">✦</span>Bir gezi ekleyin</div>
-      <div class="placeholder"><span class="ph-icon">✦</span>Bir gezi ekleyin</div>
-    </div>
+    <div class="placeholder-grid" id="gallery-geziler"></div>
   </section>
 
   <footer>
@@ -453,76 +463,151 @@
     <img id="lightboxImg" src="" alt="">
     <div class="lightbox-info">
       <h3 id="lightboxTitle"></h3>
-      <span class="lightbox-music" id="lightboxMusic"></span>
     </div>
   </div>
 </div>
 
 <!-- Audio control -->
-<span class="audio-label" id="audioLabel">Müziği aç</span>
+<span class="audio-label" id="audioLabel">
+  <span id="audioAction">Müziği aç</span>
+  <span class="audio-track-name" id="audioTrackName"></span>
+</span>
 <button class="audio-toggle" id="audioToggle" aria-label="Müziği aç/kapat" title="Müziği aç/kapat">♪</button>
 
-<audio id="bgAudio" loop preload="none">
-  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_c8f7ff0a36.mp3" type="audio/mpeg">
+<audio id="bgAudio" preload="none">
+  <source id="bgAudioSource" src="" type="audio/mpeg">
 </audio>
 
 <script>
-  // Lightbox logic
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
-  const lightboxTitle = document.getElementById('lightboxTitle');
-  const lightboxMusic = document.getElementById('lightboxMusic');
-  const lightboxClose = document.getElementById('lightboxClose');
+  // ---- Playlist (sequential, loops back to start) ----
+  const playlist = [
+    { src: 'music/track1.mp3', name: 'Aspetto Ancora Un Giorno — Piero Piccioni' },
+    { src: 'music/track2.mp3', name: 'Night Story 1 — Il Dolce Corpo di Deborah' }
+  ];
+  let trackIndex = 0;
+
   const bgAudio = document.getElementById('bgAudio');
+  const bgAudioSource = document.getElementById('bgAudioSource');
   const audioToggle = document.getElementById('audioToggle');
   const audioLabel = document.getElementById('audioLabel');
+  const audioAction = document.getElementById('audioAction');
+  const audioTrackName = document.getElementById('audioTrackName');
 
-  const trackNames = {
-    andante: 'Eşlik eden ezgi: Andante',
-    largo: 'Eşlik eden ezgi: Largo'
-  };
+  function loadTrack(i, autoplay){
+    trackIndex = i % playlist.length;
+    bgAudioSource.src = playlist[trackIndex].src;
+    bgAudio.load();
+    if(autoplay){
+      bgAudio.play().then(() => audioToggle.classList.add('playing')).catch(() => {});
+    }
+  }
 
-  document.querySelectorAll('.plate').forEach(plate => {
-    const open = () => {
-      lightboxImg.src = plate.dataset.img;
-      lightboxImg.alt = plate.querySelector('img').alt;
-      lightboxTitle.textContent = plate.dataset.title + ' · ' + plate.dataset.date;
-      lightboxMusic.textContent = trackNames[plate.dataset.track] || '';
-      lightbox.classList.add('open');
-
-      // Start ambient music automatically when entering a plate
-      if (bgAudio.paused) {
-        bgAudio.play().then(() => {
-          audioToggle.classList.add('playing');
-        }).catch(() => {});
-      }
-    };
-    plate.addEventListener('click', open);
-    plate.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
-    });
+  bgAudio.addEventListener('ended', () => {
+    loadTrack(trackIndex + 1, true);
   });
 
-  const closeLightbox = () => lightbox.classList.remove('open');
-  lightboxClose.addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  function updateAudioLabel(){
+    audioAction.textContent = bgAudio.paused ? 'Müziği aç' : 'Müziği kapat';
+    audioTrackName.textContent = playlist[trackIndex].name;
+  }
 
-  // Manual audio toggle
   audioToggle.addEventListener('click', () => {
+    if(!bgAudioSource.src){ loadTrack(0, false); }
     if (bgAudio.paused) {
       bgAudio.play().then(() => audioToggle.classList.add('playing')).catch(() => {});
     } else {
       bgAudio.pause();
       audioToggle.classList.remove('playing');
     }
+    updateAudioLabel();
   });
 
   audioToggle.addEventListener('mouseenter', () => {
-    audioLabel.textContent = bgAudio.paused ? 'Müziği aç' : 'Müziği kapat';
+    if(!bgAudioSource.src){ loadTrack(0, false); }
+    updateAudioLabel();
     audioLabel.classList.add('visible');
   });
   audioToggle.addEventListener('mouseleave', () => audioLabel.classList.remove('visible'));
+
+  // ---- Lightbox ----
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(imgSrc, alt, title, date){
+    lightboxImg.src = imgSrc;
+    lightboxImg.alt = alt || '';
+    lightboxTitle.textContent = title + (date ? ' · ' + date : '');
+    lightbox.classList.add('open');
+
+    // Start ambient music automatically on first interaction
+    if(!bgAudioSource.src){ loadTrack(0, true); }
+    else if (bgAudio.paused) {
+      bgAudio.play().then(() => audioToggle.classList.add('playing')).catch(() => {});
+    }
+  }
+
+  const closeLightbox = () => lightbox.classList.remove('open');
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // ---- Load content from content.json ----
+  fetch('content.json')
+    .then(res => res.json())
+    .then(data => {
+      renderGallery('gallery-cizimler', data.cizimler, '+', 'Yeni bir çizim ekleyin');
+      renderGallery('gallery-yazilar', data.yazilar, '✎', 'Bir yazı ekleyin');
+      renderGallery('gallery-projeler', data.projeler, '◇', 'Bir proje ekleyin');
+      renderGallery('gallery-geziler', data.geziler, '✦', 'Bir gezi ekleyin');
+    })
+    .catch(err => console.error('content.json yüklenemedi:', err));
+
+  function renderGallery(containerId, items, icon, placeholderText){
+    const container = document.getElementById(containerId);
+    if(!container) return;
+
+    (items || []).forEach(item => {
+      const article = document.createElement('article');
+      article.className = 'plate';
+      article.tabIndex = 0;
+
+      const img = document.createElement('img');
+      img.src = item.img;
+      img.alt = item.alt || '';
+      article.appendChild(img);
+
+      const cap = document.createElement('div');
+      cap.className = 'plate-cap';
+
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'plate-title';
+      titleSpan.textContent = item.title || '';
+      cap.appendChild(titleSpan);
+
+      if(item.date){
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'plate-date';
+        dateSpan.textContent = item.date;
+        cap.appendChild(dateSpan);
+      }
+
+      article.appendChild(cap);
+      container.appendChild(article);
+
+      const open = () => openLightbox(item.img, item.alt, item.title, item.date);
+      article.addEventListener('click', open);
+      article.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+    });
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.innerHTML = '<span class="ph-icon">' + icon + '</span>' + placeholderText;
+    container.appendChild(placeholder);
+  }
 </script>
 </body>
 </html>

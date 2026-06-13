@@ -1,0 +1,19 @@
+{
+  "cizimler": [
+    {
+      "img": "portrait1.jpg",
+      "title": "Profil Çalışması",
+      "date": "13.06.26",
+      "alt": "Profilden yaşlı bir adamın kalem ve mürekkep çalışması, dalgalı saçlar ve gölgelendirme ile."
+    },
+    {
+      "img": "portrait2.jpg",
+      "title": "Bereli Portre",
+      "date": "10.06.26",
+      "alt": "Bereli bir adamın yoğun çapraz tarama tekniğiyle yapılmış mürekkep portresi."
+    }
+  ],
+  "yazilar": [],
+  "projeler": [],
+  "geziler": []
+}
